@@ -1,0 +1,166 @@
+[build-system]
+requires = ["hatchling==1.31.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "llm-eval-platform"
+version = "0.1.0"
+description = "Reproducible evaluation platform for language models, RAG systems, and agents"
+readme = "README.md"
+requires-python = ">=3.12,<3.15"
+license = { file = "LICENSE" }
+authors = [{ name = "LLM Evaluation Platform contributors" }]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3.12",
+  "Typing :: Typed",
+]
+dependencies = [
+  "alembic==1.18.5",
+  "argon2-cffi==25.1.0",
+  "asyncpg==0.31.0",
+  "boto3==1.43.58",
+  "celery==5.6.3",
+  "cryptography==49.0.0",
+  "email-validator==2.3.0",
+  "fastapi==0.140.13",
+  "httpx==0.28.1",
+  "jcs==0.2.1",
+  "jiwer==4.0.0",
+  "jsonschema==4.26.0",
+  "numpy==2.5.1",
+  "opentelemetry-api==1.44.0",
+  "opentelemetry-exporter-otlp==1.44.0",
+  "opentelemetry-instrumentation-celery==0.65b0",
+  "opentelemetry-instrumentation-fastapi==0.65b0",
+  "opentelemetry-instrumentation-httpx==0.65b0",
+  "opentelemetry-instrumentation-sqlalchemy==0.65b0",
+  "opentelemetry-sdk==1.44.0",
+  "orjson==3.11.9",
+  "prometheus-client==0.26.0",
+  "pyarrow==25.0.0",
+  "pydantic==2.13.4",
+  "pydantic-settings==2.14.2",
+  "pyjwt==2.13.0",
+  "python-multipart==0.0.32",
+  "redis==8.0.1",
+  "rouge-score==0.1.2",
+  "sacrebleu==2.6.0",
+  "scikit-learn==1.9.0",
+  "scipy==1.18.0",
+  "sqlalchemy==2.0.51",
+  "structlog==26.1.0",
+  "tenacity==9.1.4",
+  "typer==0.27.0",
+  "uvicorn[standard]==0.51.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "build==1.5.0",
+  "coverage[toml]==7.15.2",
+  "hypothesis==6.163.0",
+  "mypy==2.3.0",
+  "psutil==7.2.2",
+  "pytest==9.1.1",
+  "pytest-asyncio==1.4.0",
+  "respx==0.23.1",
+  "ruff==0.16.0",
+  "testcontainers==4.15.0",
+]
+docs = [
+  "mkdocs==1.6.1",
+  "mkdocs-material==9.7.7",
+  "mkdocs-mermaid2-plugin==1.2.3",
+]
+
+[project.scripts]
+evalctl = "evalctl.main:app"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+  "apps/api/src/eval_platform_api",
+  "apps/cli/src/evalctl",
+  "apps/worker/src/eval_platform_worker",
+  "packages/application/src/eval_platform_application",
+  "packages/domain/src/eval_platform_domain",
+  "packages/evaluators/src/eval_platform_evaluators",
+  "packages/infrastructure/src/eval_platform_infrastructure",
+  "packages/metrics/src/eval_platform_metrics",
+  "packages/providers/src/eval_platform_providers",
+  "packages/schemas/src/eval_platform_schemas",
+  "packages/sdk/src/eval_platform_sdk",
+  "packages/statistics/src/eval_platform_statistics",
+]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers -ra"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+  "integration: requires containerized infrastructure",
+  "performance: repeatable performance scenario",
+  "security: adversarial or access-control behavior",
+  "live_provider: performs paid or externally hosted provider calls",
+]
+
+[tool.coverage.run]
+branch = true
+source = [
+  "eval_platform_application",
+  "eval_platform_domain",
+  "eval_platform_evaluators",
+  "eval_platform_metrics",
+  "eval_platform_providers",
+  "eval_platform_statistics",
+]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+skip_covered = true
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["migrations/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC", "S", "RUF"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S105", "S106", "S311"]
+"packages/statistics/src/eval_platform_statistics/__init__.py" = ["F401"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]
+exclude = ["migrations/versions/"]
+
+[[tool.mypy.overrides]]
+module = [
+  "boto3.*",
+  "botocore.*",
+  "celery.*",
+  "jcs.*",
+  "jsonschema.*",
+  "pyarrow.*",
+  "redis.*",
+  "rouge_score.*",
+  "sacrebleu.*",
+  "scipy.*",
+  "sklearn.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["eval_platform_worker.*"]
+disallow_untyped_decorators = false
