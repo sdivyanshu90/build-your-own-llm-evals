@@ -1,0 +1,16 @@
+.git
+.github
+.env
+.coverage
+.venv
+dist
+node_modules
+apps/web/node_modules
+apps/web/dist
+site
+artifacts
+*.log
+__pycache__
+.pytest_cache
+.mypy_cache
+.ruff_cache
