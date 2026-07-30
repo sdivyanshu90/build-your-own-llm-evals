@@ -1,0 +1,2 @@
+{"key":"agent-weather","payload":{"task":"Find the synthetic forecast for Paris and report the temperature.","expected_outcome":{"city":"Paris","temperature_c":20},"allowed_tools":["weather.lookup"]},"metadata":{"difficulty":"easy"},"splits":["test"]}
+{"key":"agent-recovery","payload":{"task":"Look up order DEMO-42, retry once after a transient error, and summarize its status.","expected_outcome":{"order_id":"DEMO-42","status":"shipped"},"allowed_tools":["orders.lookup"]},"metadata":{"difficulty":"medium","requires_recovery":true},"splits":["challenge"]}
