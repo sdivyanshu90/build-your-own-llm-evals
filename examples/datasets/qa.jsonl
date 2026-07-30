@@ -1,0 +1,2 @@
+{"key":"qa-capital-france","payload":{"question":"What is the capital of France?","context":null,"answers":["Paris"]},"metadata":{"language":"en","difficulty":"easy"},"splits":["test"]}
+{"key":"qa-water-formula","payload":{"question":"What is the chemical formula for water?","context":null,"answers":["H2O"]},"metadata":{"language":"en","difficulty":"easy"},"splits":["challenge"]}
