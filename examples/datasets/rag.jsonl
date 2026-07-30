@@ -1,0 +1,2 @@
+{"key":"rag-france","payload":{"question":"Which city is France's capital?","reference_answer":"Paris is the capital of France.","relevant_document_ids":["geo-france"]},"metadata":{"topic":"geography","language":"en"},"splits":["test"]}
+{"key":"rag-water","payload":{"question":"What atoms make up water?","reference_answer":"Water contains two hydrogen atoms and one oxygen atom.","relevant_document_ids":["chem-water"]},"metadata":{"topic":"chemistry","language":"en"},"splits":["challenge"]}
