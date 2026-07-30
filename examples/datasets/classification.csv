@@ -1,0 +1,3 @@
+id,input,label
+sentiment-positive,The support team solved my problem quickly.,positive
+sentiment-negative,The replacement arrived broken.,negative
