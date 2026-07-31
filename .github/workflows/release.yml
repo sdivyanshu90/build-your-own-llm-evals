@@ -1,0 +1,42 @@
+name: Release build
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+jobs:
+  artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.0"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: uv sync --all-extras --frozen
+      - run: uv run python -m build
+      - run: npm ci
+      - run: npm run build
+      - run: docker build -f deploy/docker/backend.Dockerfile -t llm-eval-backend:${GITHUB_REF_NAME} .
+      - run: docker build -f deploy/docker/web.Dockerfile -t llm-eval-web:${GITHUB_REF_NAME} .
+      - uses: anchore/sbom-action@v0
+        with:
+          image: llm-eval-backend:${{ github.ref_name }}
+          format: spdx-json
+          output-file: backend.spdx.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ github.ref_name }}
+          path: |
+            dist/*
+            apps/web/dist/*
+            backend.spdx.json
