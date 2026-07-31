@@ -1,0 +1,65 @@
+groups:
+  - name: llm-eval-platform
+    rules:
+      - alert: EvalApiHighErrorRate
+        expr: |
+          sum(rate(eval_http_requests_total{status=~"5.."}[10m]))
+          /
+          clamp_min(sum(rate(eval_http_requests_total[10m])), 0.001) > 0.05
+        for: 15m
+        labels: {severity: page}
+        annotations:
+          summary: LLM Eval API 5xx rate exceeds 5%
+          runbook_url: docs/operations/incident-response.md#api-errors
+      - alert: EvalQueueBacklog
+        expr: max(eval_queue_depth{queue="generation"}) > 1000
+        for: 15m
+        labels: {severity: ticket}
+        annotations:
+          summary: Generation queue backlog exceeds 1000
+          runbook_url: docs/operations/queue-operations.md
+      - alert: EvalNoWorkers
+        expr: max(eval_queue_depth) > 0 and rate(eval_samples_settled_total[10m]) == 0
+        for: 15m
+        labels: {severity: page}
+        annotations:
+          summary: Evaluation work is queued but no samples are settling
+          runbook_url: docs/operations/stuck-run-recovery.md
+      - alert: EvalProviderFailureBurst
+        expr: sum(rate(eval_task_failures_total{category="provider_error"}[10m])) > 1
+        for: 10m
+        labels: {severity: ticket}
+        annotations:
+          summary: Provider failures exceed one per second
+          runbook_url: docs/operations/provider-outage.md
+      - alert: EvalJudgeValidationFailures
+        expr: sum(rate(eval_judge_validation_failures_total[15m])) > 0.1
+        for: 15m
+        labels: {severity: ticket}
+        annotations:
+          summary: Judge structured-output validation is failing
+          runbook_url: docs/operations/judge-failures.md
+      - alert: EvalBudgetBreach
+        expr: increase(eval_budget_breaches_total[5m]) > 0
+        labels: {severity: ticket}
+        annotations:
+          summary: An evaluation budget rejected work
+          runbook_url: docs/operations/cost-incident.md
+      - alert: EvalApiLatency
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum by (le) (rate(eval_http_request_duration_seconds_bucket[10m]))
+          ) > 2
+        for: 15m
+        labels: {severity: ticket}
+        annotations:
+          summary: API p99 latency exceeds two seconds
+          runbook_url: docs/operations/incident-response.md#latency
+      - alert: EvalTargetDown
+        expr: up{job=~"llm-eval.*"} == 0
+        for: 5m
+        labels: {severity: page}
+        annotations:
+          summary: LLM Eval scrape target is unavailable
+          runbook_url: docs/operations/incident-response.md#dependency-unavailable
