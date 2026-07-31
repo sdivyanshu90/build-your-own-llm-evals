@@ -1,0 +1,88 @@
+name: Security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: python,javascript-typescript
+      - uses: github/codeql-action/analyze@v4
+
+  dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.0"
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: uv sync --all-extras --frozen
+      - run: uv pip check
+      - run: uv run python scripts/check_licenses.py
+      - run: npm ci
+      - run: npm audit --audit-level=high
+
+  images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f deploy/docker/backend.Dockerfile -t llm-eval-backend:scan .
+      - run: docker build -f deploy/docker/web.Dockerfile -t llm-eval-web:scan .
+      - uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: llm-eval-backend:scan
+          format: sarif
+          output: trivy-backend.sarif
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: trivy-backend.sarif
+      - uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: llm-eval-web:scan
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+      - uses: anchore/sbom-action@v0
+        with:
+          image: llm-eval-backend:scan
+          format: spdx-json
+          output-file: backend.spdx.json
+      - uses: anchore/sbom-action@v0
+        with:
+          image: llm-eval-web:scan
+          format: spdx-json
+          output-file: web.spdx.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: software-bills-of-materials
+          path: "*.spdx.json"
