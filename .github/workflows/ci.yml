@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.0"
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --all-extras --frozen
+      - run: uv run ruff format --check .
+      - run: uv run ruff check .
+      - run: uv run mypy apps packages
+      - run: uv run coverage run -m pytest -m "not integration and not performance and not live_provider"
+      - run: uv run coverage report
+      - run: uv run coverage xml
+      - run: uv run python -m build
+      - run: uv run mkdocs build --strict
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run audit
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  container:
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f deploy/docker/backend.Dockerfile -t llm-eval-backend:test .
+      - run: docker build -f deploy/docker/web.Dockerfile -t llm-eval-web:test .
+      - run: test "$(docker image inspect llm-eval-backend:test --format '{{.Config.User}}')" = "10001:10001"
+      - run: test "$(docker image inspect llm-eval-web:test --format '{{.Config.User}}')" = "101:101"
+      - run: docker run --rm --entrypoint python llm-eval-backend:test -c "from eval_platform_infrastructure.settings import Settings; assert Settings().outbox_relay_interval_seconds == 5"
+      - run: docker run --rm --entrypoint python llm-eval-backend:test -c "from eval_platform_api.main import app; assert len(app.openapi()['paths']) >= 22"
+      - run: docker run --rm -v "$PWD:/workspace" -w /workspace registry.k8s.io/kubectl:v1.34.3 kustomize deploy/kubernetes
