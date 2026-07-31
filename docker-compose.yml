@@ -1,0 +1,140 @@
+name: llm-eval-platform
+
+services:
+  postgres:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-eval}
+      POSTGRES_USER: ${POSTGRES_USER:-eval}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eval-local-only}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports: ["${EVAL_POSTGRES_HOST_PORT:-55432}:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:8.0.3-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redis-data:/data
+    ports: ["${EVAL_REDIS_HOST_PORT:-56379}:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-eval-local-access}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-eval-local-secret-change-me}
+    volumes:
+      - minio-data:/data
+    ports:
+      [
+        "${EVAL_MINIO_HOST_PORT:-59000}:9000",
+        "${EVAL_MINIO_CONSOLE_HOST_PORT:-59001}:9001",
+      ]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    image: ${EVAL_BACKEND_IMAGE:-llm-eval-backend:local}
+    build:
+      context: .
+      dockerfile: deploy/docker/backend.Dockerfile
+    command: ["alembic", "upgrade", "head"]
+    env_file: [.env]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    image: ${EVAL_BACKEND_IMAGE:-llm-eval-backend:local}
+    env_file: [.env]
+    ports: ["8000:8000"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/live', timeout=2)",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+
+  worker:
+    image: ${EVAL_BACKEND_IMAGE:-llm-eval-backend:local}
+    command:
+      [
+        "celery",
+        "-A",
+        "eval_platform_worker.celery_app:celery_app",
+        "worker",
+        "--loglevel=INFO",
+        "--queues=generation,metrics,maintenance",
+        "--concurrency=${EVAL_WORKER_CONCURRENCY:-4}",
+        "--max-tasks-per-child=100",
+      ]
+    env_file: [.env]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    stop_grace_period: 45s
+
+  scheduler:
+    image: ${EVAL_BACKEND_IMAGE:-llm-eval-backend:local}
+    command:
+      [
+        "celery",
+        "-A",
+        "eval_platform_worker.celery_app:celery_app",
+        "beat",
+        "--loglevel=INFO",
+        "--schedule=/tmp/celerybeat-schedule",
+      ]
+    env_file: [.env]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    stop_grace_period: 30s
+
+  web:
+    image: ${EVAL_WEB_IMAGE:-llm-eval-web:local}
+    build:
+      context: .
+      dockerfile: deploy/docker/web.Dockerfile
+    ports: ["5173:8080"]
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  redis-data:
+  minio-data:
