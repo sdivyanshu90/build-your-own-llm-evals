@@ -1,0 +1,15 @@
+{
+  "schema_version": "judge-response/1",
+  "verdict": "B",
+  "scores": {
+    "correctness": 4,
+    "relevance": 5
+  },
+  "confidence": 0.82,
+  "evidence": [
+    "B:L0001",
+    "R:L0001"
+  ],
+  "justification": "Candidate B directly answers the question and agrees with the cited reference.",
+  "abstention_reason": null
+}
