@@ -1,0 +1,79 @@
+site_name: LLM Evaluation Platform
+site_description: Reproducible evaluation for language models, RAG systems, and agents
+repo_url: https://github.com/example/llm-eval-platform
+edit_uri: ""
+strict: true
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.indexes
+    - content.code.copy
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+plugins:
+  - search
+  - mermaid2
+nav:
+  - Home: index.md
+  - Design:
+      - Phase 1: design/phase-1-design.md
+      - Traceability: design/requirement-traceability-matrix.md
+  - Architecture:
+      - Platform foundation: architecture/platform-foundation.md
+      - Production architecture: architecture/production-architecture.md
+  - Concepts:
+      - Versioned datasets: concepts/versioned-datasets.md
+      - Evaluation engine: concepts/evaluation-engine.md
+      - Metric framework: concepts/metric-framework.md
+      - Pairwise judging: concepts/pairwise-judging.md
+  - Statistics:
+      - Inference for evaluations: statistics/inference.md
+  - Guides:
+      - Local development: guides/local-development.md
+      - Dataset workflow: guides/datasets.md
+      - Evaluation runs: guides/evaluation-runs.md
+      - Custom metrics: guides/custom-metrics.md
+      - Judges: guides/judges.md
+      - Comparisons and gates: guides/comparisons-and-gates.md
+      - CLI: guides/cli.md
+      - Python SDK: guides/sdk.md
+      - Production deployment: guides/production-deployment.md
+  - API:
+      - Compatibility: api/compatibility.md
+  - Security:
+      - Threat model: security/threat-model.md
+  - Operations:
+      - Configuration: operations/configuration.md
+      - Dependency upgrades: operations/dependency-upgrades.md
+      - Backup and restore: operations/backup-restore.md
+      - Queue operations: operations/queue-operations.md
+      - Stuck-run recovery: operations/stuck-run-recovery.md
+      - Provider outage: operations/provider-outage.md
+      - Cost incident: operations/cost-incident.md
+      - Judge failures: operations/judge-failures.md
+      - Incident response: operations/incident-response.md
+      - Secret rotation: operations/secret-rotation.md
+      - Disaster recovery: operations/disaster-recovery.md
+      - Data deletion: operations/data-deletion.md
+      - Upgrades: operations/upgrades.md
+  - Testing:
+      - Phases 2–5: testing/phases-2-5.md
+      - Phases 6–10: testing/phases-6-10.md
+  - Decisions:
+      - Foundation: adr/0001-platform-foundation.md
+      - Dataset identity: adr/0002-dataset-identity.md
+      - Asynchronous execution: adr/0003-asynchronous-execution.md
+      - Provider and metric plugins: adr/0004-provider-metric-plugins.md
+      - Judges and statistics: adr/0005-judges-and-statistics.md
+      - Production deployment: adr/0006-production-deployment.md
