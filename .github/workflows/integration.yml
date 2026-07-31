@@ -1,0 +1,57 @@
+name: Integration
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-redis-s3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.0"
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --all-extras --frozen
+      - run: cp .env.example .env
+      - run: docker compose up -d postgres redis minio
+      - run: docker compose run --rm --build migrate
+      - name: Real dependency integration tests
+        env:
+          EVAL_ENVIRONMENT: test
+          EVAL_DATABASE_URL: postgresql+asyncpg://eval:eval-local-only@127.0.0.1:55432/eval
+          EVAL_REDIS_URL: redis://127.0.0.1:56379/0
+          EVAL_CELERY_BROKER_URL: redis://127.0.0.1:56379/1
+          EVAL_S3_ENDPOINT_URL: http://127.0.0.1:59000
+        run: uv run pytest tests/integration -q
+      - run: uv run pytest tests/performance -q
+      - run: docker compose up -d api worker
+      - run: docker compose run --rm api python -m eval_platform_api.seed
+      - run: docker compose run --rm api python -m eval_platform_api.demo
+      - run: docker compose exec -T api python -c "import os; assert os.getuid() == 10001"
+      - run: docker compose exec -T worker python -c "import os; assert os.getuid() == 10001"
+      - if: always()
+        run: docker compose logs --no-color
+      - if: always()
+        run: docker compose down -v
+
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run test:e2e --workspace @llm-eval/web
