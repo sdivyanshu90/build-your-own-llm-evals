@@ -1,0 +1,24 @@
+{"id":"arithmetic-multiplication","category":"arithmetic","prompt":"Compute 17 multiplied by 23.","accepted_answers":["391"]}
+{"id":"arithmetic-division-addition","category":"arithmetic","prompt":"Divide 144 by 12, then add 7.","accepted_answers":["19"]}
+{"id":"arithmetic-percentage","category":"arithmetic","prompt":"What is 15 percent of 260?","accepted_answers":["39"]}
+{"id":"arithmetic-sequence","category":"arithmetic","prompt":"Give the next number in this sequence: 2, 6, 12, 20, 30.","accepted_answers":["42"]}
+{"id":"logic-calendar","category":"logic","prompt":"If today is Tuesday, what day of the week will it be 100 days from today?","accepted_answers":["Thursday"]}
+{"id":"logic-ordering","category":"logic","prompt":"Alice is older than Bob, and Bob is older than Chen. Who is the youngest?","accepted_answers":["Chen"]}
+{"id":"logic-syllogism","category":"logic","prompt":"Every narp is a glim. No glim is a trove. Can any narp be a trove? Answer yes or no.","accepted_answers":["no"]}
+{"id":"logic-number-comparison","category":"logic","prompt":"Which is largest: 0.8, 3/4, or 0.79?","accepted_answers":["0.8"]}
+{"id":"science-water","category":"science","prompt":"What is the chemical formula for water?","accepted_answers":["H2O"]}
+{"id":"science-planet","category":"science","prompt":"What is the largest planet in the Solar System?","accepted_answers":["Jupiter"]}
+{"id":"science-dna","category":"science","prompt":"In DNA, which base normally pairs with adenine?","accepted_answers":["thymine"]}
+{"id":"science-force-unit","category":"science","prompt":"What is the SI unit of force?","accepted_answers":["newton"]}
+{"id":"language-antonym","category":"language","prompt":"Give one common antonym of the word scarce.","accepted_answers":["abundant","plentiful"]}
+{"id":"language-plural","category":"language","prompt":"What is the standard English plural of analysis?","accepted_answers":["analyses"]}
+{"id":"language-alphabetize","category":"language","prompt":"Alphabetize these words and separate them with comma-space: pear, apple, banana.","accepted_answers":["apple, banana, pear"]}
+{"id":"language-letter-count","category":"language","prompt":"How many times does the letter i appear in mississippi?","accepted_answers":["4"]}
+{"id":"classification-positive","category":"classification","prompt":"Classify the sentiment as positive, neutral, or negative: The support team solved my problem quickly.","accepted_answers":["positive"]}
+{"id":"classification-negative","category":"classification","prompt":"Classify the sentiment as positive, neutral, or negative: The replacement arrived broken.","accepted_answers":["negative"]}
+{"id":"classification-neutral","category":"classification","prompt":"Classify the sentiment as positive, neutral, or negative: The package was delivered on Tuesday.","accepted_answers":["neutral"]}
+{"id":"classification-spam","category":"classification","prompt":"Classify as spam or not-spam: URGENT! You won a prize. Click this unknown link now.","accepted_answers":["spam"]}
+{"id":"extraction-invoice","category":"extraction","prompt":"Extract only the invoice identifier from: Invoice INV-2047 was issued on 2026-07-01 for USD 82.40.","accepted_answers":["INV-2047"]}
+{"id":"extraction-ip","category":"extraction","prompt":"Extract only the IPv4 address from: 2026-07-30T10:04:02Z login accepted from 192.0.2.17 user=demo.","accepted_answers":["192.0.2.17"]}
+{"id":"extraction-city","category":"extraction","prompt":"Extract only the city from: Name: Ana Ribeiro; City: Porto; Country: Portugal.","accepted_answers":["Porto"]}
+{"id":"transformation-reverse","category":"extraction","prompt":"Reverse the characters in the word stressed.","accepted_answers":["desserts"]}
