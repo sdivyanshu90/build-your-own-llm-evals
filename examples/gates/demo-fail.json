@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "rules": [
+    {
+      "identifier": "no-demo-regression",
+      "metric_identifier": "language/exact-match",
+      "operator": "maximum_regression",
+      "threshold": 0,
+      "minimum_paired_count": 3,
+      "required": true
+    }
+  ]
+}
