@@ -1,0 +1,20 @@
+{
+  "name": "llm-eval-platform",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "audit": "npm audit --audit-level=high",
+    "build": "npm run build --workspace @llm-eval/web",
+    "dev": "npm run dev --workspace @llm-eval/web",
+    "format:check": "prettier --check \"apps/web/**/*.{ts,tsx,js,json,css,html}\" package.json",
+    "lint": "npm run lint --workspace @llm-eval/web",
+    "test": "npm run test --workspace @llm-eval/web",
+    "typecheck": "npm run typecheck --workspace @llm-eval/web"
+  },
+  "engines": {
+    "node": ">=24.15"
+  }
+}
