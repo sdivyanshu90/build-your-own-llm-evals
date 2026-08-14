@@ -53,7 +53,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: docker build -f deploy/docker/backend.Dockerfile -t llm-eval-backend:scan .
       - run: docker build -f deploy/docker/web.Dockerfile -t llm-eval-web:scan .
-      - uses: aquasecurity/trivy-action@0.33.1
+      - uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: llm-eval-backend:scan
           format: sarif
@@ -65,7 +65,7 @@ jobs:
         if: always()
         with:
           sarif_file: trivy-backend.sarif
-      - uses: aquasecurity/trivy-action@0.33.1
+      - uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: llm-eval-web:scan
           format: table
