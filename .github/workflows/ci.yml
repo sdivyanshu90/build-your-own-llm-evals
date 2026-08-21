@@ -12,7 +12,7 @@ jobs:
   backend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v6
         with:
           version: "0.12.0"
@@ -33,7 +33,7 @@ jobs:
   frontend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [backend, frontend]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: docker build -f deploy/docker/backend.Dockerfile -t llm-eval-backend:test .
       - run: docker build -f deploy/docker/web.Dockerfile -t llm-eval-web:test .
       - run: test "$(docker image inspect llm-eval-backend:test --format '{{.Config.User}}')" = "10001:10001"
