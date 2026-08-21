@@ -15,7 +15,7 @@ jobs:
   source:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v3
@@ -29,7 +29,7 @@ jobs:
   dependencies:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v6
         with:
           version: "0.12.0"
@@ -50,7 +50,7 @@ jobs:
   images:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: docker build -f deploy/docker/backend.Dockerfile -t llm-eval-backend:scan .
       - run: docker build -f deploy/docker/web.Dockerfile -t llm-eval-web:scan .
       - uses: aquasecurity/trivy-action@0.33.1
